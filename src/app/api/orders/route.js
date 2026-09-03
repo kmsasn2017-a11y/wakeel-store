@@ -1,1 +1,1 @@
-// This file is intentionally left empty. Use route.ts instead.
+// This file is intentionally left empty. See route.ts for the implementation.

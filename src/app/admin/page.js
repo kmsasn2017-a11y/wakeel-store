@@ -1,1 +1,1 @@
-// This file is intentionally left empty. Use page.tsx instead.
+// This file is intentionally left empty. See page.tsx for the implementation.

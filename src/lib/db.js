@@ -1,8 +1,11 @@
+import { PrismaClient } from "@prisma/client";
 
-function prisma(...args) {
-  // eslint-disable-next-line no-console
-  console.warn('Placeholder: prisma is not implemented yet.', args);
-  return null;
-}
+const globalForPrisma = globalThis;
 
-export { prisma };
+export const prisma =
+  globalForPrisma?.prisma ||
+  new PrismaClient({
+    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+  });
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

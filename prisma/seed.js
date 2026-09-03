@@ -2,21 +2,21 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.settings.upsert({
+  await prisma?.settings?.upsert({
     where: { id: 1 },
     update: {},
     create: { id: 1, southMultiplier: 3.0, southCommissionPer1000: 250, sanaaMargin: 0, southMargin: 0, roundStep: 50, autoPricingEnabled: true, whatsappNumber: "772764659" },
   });
 
-  const catTiktok = await prisma.category.upsert({ where: { id: "cat_tiktok" }, update: {}, create: { id: "cat_tiktok", name: "تيك توك", sortOrder: 1 } });
-  const catEfootball = await prisma.category.upsert({ where: { id: "cat_efootball" }, update: {}, create: { id: "cat_efootball", name: "إي فوتبول eFootball", sortOrder: 2 } });
-  const catPubg = await prisma.category.upsert({ where: { id: "cat_pubg" }, update: {}, create: { id: "cat_pubg", name: "ببجي موبايل", sortOrder: 3 } });
+  const catTiktok = await prisma?.category?.upsert({ where: { id: "cat_tiktok" }, update: {}, create: { id: "cat_tiktok", name: "تيك توك", sortOrder: 1 } });
+  const catEfootball = await prisma?.category?.upsert({ where: { id: "cat_efootball" }, update: {}, create: { id: "cat_efootball", name: "إي فوتبول eFootball", sortOrder: 2 } });
+  const catPubg = await prisma?.category?.upsert({ where: { id: "cat_pubg" }, update: {}, create: { id: "cat_pubg", name: "ببجي موبايل", sortOrder: 3 } });
   // تصنيف التطبيقات بهامش ربح 20% كما طلب المالك
-  await prisma.category.upsert({ where: { id: "cat_apps" }, update: { marginPercent: 20 }, create: { id: "cat_apps", name: "تطبيقات وخدمات", sortOrder: 4, marginPercent: 20 } });
+  await prisma?.category?.upsert({ where: { id: "cat_apps" }, update: { marginPercent: 20 }, create: { id: "cat_apps", name: "تطبيقات وخدمات", sortOrder: 4, marginPercent: 20 } });
 
   const products = [
     {
-      id: "prod_tiktok_coins", name: "شحن عملات تيك توك TikTok", categoryId: catTiktok.id, featured: true,
+      id: "prod_tiktok_coins", name: "شحن عملات تيك توك TikTok", categoryId: catTiktok?.id, featured: true,
       description: "شحن عملات تيك توك مباشر وآمن — أسعار صنعاء والجنوب.",
       packages: [
         ["500 عملة", 3450, 10600], ["700 عملة", 4800, 14450], ["1,000 عملة", 6750, 19900],
@@ -26,7 +26,7 @@ async function main() {
       ],
     },
     {
-      id: "prod_efootball_coins", name: "شحن عملات eFootball Coins", categoryId: catEfootball.id, featured: true,
+      id: "prod_efootball_coins", name: "شحن عملات eFootball Coins", categoryId: catEfootball?.id, featured: true,
       description: "شحن عملات ليجندات eFootball — أسعار صنعاء وعدن.",
       packages: [
         ["باقة لويس سواريز (50 عملة)", 700, 2050], ["مجموعة البداية - إيكر كاسياس", 2000, 5860],
@@ -36,12 +36,12 @@ async function main() {
       ],
     },
     {
-      id: "prod_efootball_bundle", name: "عرض كاسياس + سواريز (عرض محدود)", categoryId: catEfootball.id, featured: true, isNew: true,
+      id: "prod_efootball_bundle", name: "عرض كاسياس + سواريز (عرض محدود)", categoryId: catEfootball?.id, featured: true, isNew: true,
       description: "عرض خاص محدود يجمع كاسياس ومجموعته مع سواريز ومجموعته.",
       packages: [["كاسياس + مجموعته", 2000, 7000], ["سواريز + مجموعته", 700, 2200]],
     },
     {
-      id: "prod_pubg_uc", name: "شحن شدات ببجي موبايل PUBG UC", categoryId: catPubg.id, featured: true,
+      id: "prod_pubg_uc", name: "شحن شدات ببجي موبايل PUBG UC", categoryId: catPubg?.id, featured: true,
       description: "شحن شدات ببجي موبايل مباشر وسريع.",
       packages: [
         ["60 شدة", 500, 1500], ["325 شدة", 2450, 7500], ["660 شدة", 4900, 14500],
@@ -52,13 +52,13 @@ async function main() {
   ];
 
   for (const p of products) {
-    await prisma.product.upsert({
-      where: { id: p.id },
+    await prisma?.product?.upsert({
+      where: { id: p?.id },
       update: {},
       create: {
-        id: p.id, name: p.name, description: p.description, categoryId: p.categoryId,
-        featured: !!p.featured, isNew: !!p.isNew, active: true,
-        packages: { create: p.packages.map(([name, sanaa, south], i) => ({ name, sanaaPrice: sanaa, southPrice: south, pricingMode: "manual", sortOrder: i })) },
+        id: p?.id, name: p?.name, description: p?.description, categoryId: p?.categoryId,
+        featured: !!p?.featured, isNew: !!p?.isNew, active: true,
+        packages: { create: p?.packages?.map(([name, sanaa, south], i) => ({ name, sanaaPrice: sanaa, southPrice: south, pricingMode: "manual", sortOrder: i })) },
       },
     });
   }
@@ -72,10 +72,10 @@ async function main() {
     { id: "pm_onecash", name: "محفظة OneCash (وان كاش)", type: "محفظة إلكترونية", accountNumber: "772764659", region: "both", sortOrder: 6 },
   ];
   for (const m of methods) {
-    await prisma.paymentMethod.upsert({ where: { id: m.id }, update: {}, create: { ...m, active: true, requiresReference: true } });
+    await prisma?.paymentMethod?.upsert({ where: { id: m?.id }, update: {}, create: { ...m, active: true, requiresReference: true } });
   }
 
   console.log("✅ تم زرع البيانات الأولية بنجاح");
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(() => prisma.$disconnect());
+main()?.catch((e) => { console.error(e); process.exit(1); })?.finally(() => prisma?.$disconnect());

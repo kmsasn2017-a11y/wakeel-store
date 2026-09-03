@@ -2,7 +2,7 @@
 // ⚠️ هذا حل أولي للتجربة فقط — قبل الإطلاق الفعلي استبدله بنظام تسجيل دخول
 // حقيقي (NextAuth أو مشابه) مع جلسات وصلاحيات مستخدمين.
 export function isAdminRequest(req) {
-  const key = req.headers.get("x-admin-key");
+  const key = req?.headers?.get("x-admin-key");
   return key && key === (process.env.ADMIN_PASSWORD || "admin123");
 }
 

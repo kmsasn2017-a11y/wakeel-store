@@ -3,15 +3,15 @@ import { useState } from "react";
 import { api, fmt, computeSouthPriceClient } from "@/lib/apiClient";
 
 function packagePrice(pkg, region, settings, categoryMargin) {
-  if (region === "sanaa") return Number(pkg.sanaaPrice) || 0;
-  if (pkg.pricingMode === "manual") return Number(pkg.southPrice) || 0;
-  return computeSouthPriceClient(pkg.sanaaPrice, settings, categoryMargin);
+  if (region === "sanaa") return Number(pkg?.sanaaPrice) || 0;
+  if (pkg?.pricingMode === "manual") return Number(pkg?.southPrice) || 0;
+  return computeSouthPriceClient(pkg?.sanaaPrice, settings, categoryMargin);
 }
 
 export default function ProductModal({ product, region, setRegion, settings, paymentMethods, onClose }) {
-  const categoryMargin = product.category?.marginPercent || 0;
-  const identifierType = product.identifierType || "player_id";
-  const [pkgId, setPkgId] = useState(product.packages?.[0]?.id || null);
+  const categoryMargin = product?.category?.marginPercent || 0;
+  const identifierType = product?.identifierType || "player_id";
+  const [pkgId, setPkgId] = useState(product?.packages?.[0]?.id || null);
   const [form, setForm] = useState({ customerName: "", phone: "", playerId: "", accountEmail: "", accountPassword: "" });
   const [methodId, setMethodId] = useState("");
   const [transferRef, setTransferRef] = useState("");
@@ -19,51 +19,51 @@ export default function ProductModal({ product, region, setRegion, settings, pay
   const [submitting, setSubmitting] = useState(false);
   const [placed, setPlaced] = useState(null);
 
-  const pkg = product.packages?.find((p) => p.id === pkgId);
+  const pkg = product?.packages?.find((p) => p?.id === pkgId);
   const price = pkg ? packagePrice(pkg, region, settings, categoryMargin) : 0;
-  const availableMethods = paymentMethods.filter((m) => m.active && (m.region === "both" || m.region === region));
-  const selectedMethod = availableMethods.find((m) => m.id === methodId);
+  const availableMethods = paymentMethods?.filter((m) => m?.active && (m?.region === "both" || m?.region === region));
+  const selectedMethod = availableMethods?.find((m) => m?.id === methodId);
 
   const identifierOk =
     identifierType === "none"
       ? true
       : identifierType === "email_password"
-      ? form.accountEmail && form.accountPassword
-      : !!form.playerId;
+      ? form?.accountEmail && form?.accountPassword
+      : !!form?.playerId;
 
   const canSubmit =
-    form.phone && pkg && methodId && identifierOk && (!selectedMethod?.requiresReference || transferRef);
+    form?.phone && pkg && methodId && identifierOk && (!selectedMethod?.requiresReference || transferRef);
 
   const submit = async () => {
     setErr("");
     setSubmitting(true);
     try {
-      const order = await api.createOrder({
-        customerName: form.customerName,
-        phone: form.phone,
-        playerId: identifierType === "player_id" ? form.playerId : "",
-        accountEmail: identifierType === "email_password" ? form.accountEmail : "",
-        accountPassword: identifierType === "email_password" ? form.accountPassword : "",
+      const order = await api?.createOrder({
+        customerName: form?.customerName,
+        phone: form?.phone,
+        playerId: identifierType === "player_id" ? form?.playerId : "",
+        accountEmail: identifierType === "email_password" ? form?.accountEmail : "",
+        accountPassword: identifierType === "email_password" ? form?.accountPassword : "",
         identifierType,
-        productName: product.name,
-        productImage: product.image || "",
-        packageName: pkg.name,
+        productName: product?.name,
+        productImage: product?.image || "",
+        packageName: pkg?.name,
         region: region === "sanaa" ? "صنعاء" : "الجنوب",
         price,
         paymentMethodId: methodId,
         transferReference: transferRef,
       });
-      const wa = settings.whatsappNumber || "772764659";
+      const wa = settings?.whatsappNumber || "772764659";
       const identifierLine =
         identifierType === "email_password"
-          ? `%0A📧 البريد: ${form.accountEmail}%0A🔑 كلمة المرور: ${form.accountPassword}`
+          ? `%0A📧 البريد: ${form?.accountEmail}%0A🔑 كلمة المرور: ${form?.accountPassword}`
           : identifierType === "player_id"
-          ? `%0A🆔 ID اللاعب: ${form.playerId}`
+          ? `%0A🆔 ID اللاعب: ${form?.playerId}`
           : "";
-      const msg = `🛒 طلب جديد%0A%0A🎮 المنتج: ${product.name}%0A📦 الباقة: ${pkg.name}%0A💰 السعر: ${fmt(price)} ريال%0A📍 المنطقة: ${order.region}%0A💳 وسيلة الدفع: ${selectedMethod?.name || ""}${transferRef ? `%0A🧾 رقم الحوالة: ${transferRef}` : ""}${form.customerName ? `%0A👤 اسم العميل: ${form.customerName}` : ""}%0A📱 رقم العميل: ${form.phone}${identifierLine}`;
+      const msg = `🛒 طلب جديد%0A%0A🎮 المنتج: ${product?.name}%0A📦 الباقة: ${pkg?.name}%0A💰 السعر: ${fmt(price)} ريال%0A📍 المنطقة: ${order?.region}%0A💳 وسيلة الدفع: ${selectedMethod?.name || ""}${transferRef ? `%0A🧾 رقم الحوالة: ${transferRef}` : ""}${form?.customerName ? `%0A👤 اسم العميل: ${form?.customerName}` : ""}%0A📱 رقم العميل: ${form?.phone}${identifierLine}`;
       setPlaced(`https://wa.me/${wa}?text=${msg}`);
     } catch (e) {
-      setErr(e.message || "تعذر إنشاء الطلب");
+      setErr(e?.message || "تعذر إنشاء الطلب");
     } finally {
       setSubmitting(false);
     }
@@ -73,7 +73,7 @@ export default function ProductModal({ product, region, setRegion, settings, pay
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="bg-surface border border-border w-full sm:max-w-2xl sm:rounded-2xl rounded-t-2xl max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border sticky top-0 bg-surface">
-          <h3 className="font-semibold">{product.name}</h3>
+          <h3 className="font-semibold">{product?.name}</h3>
           <button onClick={onClose} className="text-muted hover:text-white">✕</button>
         </div>
         <div className="p-5">
@@ -89,49 +89,49 @@ export default function ProductModal({ product, region, setRegion, settings, pay
             <div className="grid sm:grid-cols-2 gap-5">
               <div>
                 <div className="w-full aspect-square rounded-xl border border-border mb-3 bg-bg flex items-center justify-center overflow-hidden">
-                  {product.image ? <img src={product.image} className="w-full h-full object-cover" /> : <span className="text-[#4A5570] text-xs">لا توجد صورة</span>}
+                  {product?.image ? <img src={product?.image} className="w-full h-full object-cover" /> : <span className="text-[#4A5570] text-xs">لا توجد صورة</span>}
                 </div>
-                {product.description && <p className="text-xs text-muted leading-relaxed">{product.description}</p>}
+                {product?.description && <p className="text-xs text-muted leading-relaxed">{product?.description}</p>}
               </div>
               <div>
                 <div className="flex bg-bg border border-border rounded-full p-1 mb-3 w-fit">
-                  {[{ id: "sanaa", label: "صنعاء" }, { id: "south", label: "الجنوب" }].map((r) => (
-                    <button key={r.id} onClick={() => setRegion(r.id)} className={`text-xs font-medium px-3.5 py-1.5 rounded-full transition-colors ${region === r.id ? "bg-teal text-bg" : "text-muted"}`}>
-                      {r.label}
+                  {[{ id: "sanaa", label: "صنعاء" }, { id: "south", label: "الجنوب" }]?.map((r) => (
+                    <button key={r?.id} onClick={() => setRegion(r?.id)} className={`text-xs font-medium px-3.5 py-1.5 rounded-full transition-colors ${region === r?.id ? "bg-teal text-bg" : "text-muted"}`}>
+                      {r?.label}
                     </button>
                   ))}
                 </div>
                 <div className="space-y-1.5 mb-4 max-h-36 overflow-y-auto">
-                  {(product.packages || []).map((pk) => (
-                    <button key={pk.id} onClick={() => setPkgId(pk.id)} className={`w-full flex items-center justify-between text-right px-3 py-2 rounded-lg border text-sm transition-colors ${pkgId === pk.id ? "border-gold bg-gold/10" : "border-border bg-bg"}`}>
-                      <span>{pk.name}</span>
+                  {(product?.packages || [])?.map((pk) => (
+                    <button key={pk?.id} onClick={() => setPkgId(pk?.id)} className={`w-full flex items-center justify-between text-right px-3 py-2 rounded-lg border text-sm transition-colors ${pkgId === pk?.id ? "border-gold bg-gold/10" : "border-border bg-bg"}`}>
+                      <span>{pk?.name}</span>
                       <span className="text-teal font-bold">{fmt(packagePrice(pk, region, settings, categoryMargin))} ريال</span>
                     </button>
                   ))}
                 </div>
 
                 <div className="space-y-2.5">
-                  <input placeholder="اسم العميل (اختياري)" value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
-                  <input placeholder="رقم الهاتف" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
+                  <input placeholder="اسم العميل (اختياري)" value={form?.customerName} onChange={(e) => setForm({ ...form, customerName: e?.target?.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
+                  <input placeholder="رقم الهاتف" value={form?.phone} onChange={(e) => setForm({ ...form, phone: e?.target?.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
 
                   {identifierType === "player_id" && (
-                    <input placeholder="🆔 معرّف اللاعب (ID)" value={form.playerId} onChange={(e) => setForm({ ...form, playerId: e.target.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
+                    <input placeholder="🆔 معرّف اللاعب (ID)" value={form?.playerId} onChange={(e) => setForm({ ...form, playerId: e?.target?.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
                   )}
                   {identifierType === "email_password" && (
                     <>
-                      <input placeholder="📧 البريد الإلكتروني للحساب" value={form.accountEmail} onChange={(e) => setForm({ ...form, accountEmail: e.target.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
-                      <input type="password" placeholder="🔑 كلمة مرور الحساب" value={form.accountPassword} onChange={(e) => setForm({ ...form, accountPassword: e.target.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
+                      <input placeholder="📧 البريد الإلكتروني للحساب" value={form?.accountEmail} onChange={(e) => setForm({ ...form, accountEmail: e?.target?.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
+                      <input type="password" placeholder="🔑 كلمة مرور الحساب" value={form?.accountPassword} onChange={(e) => setForm({ ...form, accountPassword: e?.target?.value })} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
                       <p className="text-[11px] text-muted">تُستخدم هذه البيانات فقط لتنفيذ عملية الشحن على حسابك.</p>
                     </>
                   )}
 
-                  <select value={methodId} onChange={(e) => setMethodId(e.target.value)} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold">
+                  <select value={methodId} onChange={(e) => setMethodId(e?.target?.value)} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold">
                     <option value="">اختر وسيلة الدفع</option>
-                    {availableMethods.map((m) => <option key={m.id} value={m.id}>{m.name} — {m.accountNumber}</option>)}
+                    {availableMethods?.map((m) => <option key={m?.id} value={m?.id}>{m?.name} — {m?.accountNumber}</option>)}
                   </select>
 
                   {selectedMethod?.requiresReference && (
-                    <input placeholder="رقم الحوالة بعد التحويل" value={transferRef} onChange={(e) => setTransferRef(e.target.value)} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
+                    <input placeholder="رقم الحوالة بعد التحويل" value={transferRef} onChange={(e) => setTransferRef(e?.target?.value)} className="w-full bg-bg border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-gold" />
                   )}
 
                   {err && <p className="text-xs text-danger">{err}</p>}

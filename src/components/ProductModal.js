@@ -120,3 +120,5 @@ export default function ProductModal({ product, region, setRegion, settings, pay
     </div>
   );
 }
+
+export {};

@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id            String    @id @default(cuid())
+  name          String
+  active        Boolean   @default(true)
+  sortOrder     Int       @default(0)
+  // هامش ربح إضافي خاص بالتصنيف، يُطبّق فوق هامش الجنوب العام
+  // (مثال: تصنيف "تطبيقات" = 20%)
+  marginPercent Float     @default(0)
+  products      Product[]
+}
+
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  active      Boolean   @default(true)
+  featured    Boolean   @default(false)
+  isNew       Boolean   @default(false)
+  sortOrder   Int       @default(0)
+  // ما الذي يحتاجه هذا المنتج من العميل لتنفيذ الشحن:
+  // "player_id"      -> معرف اللاعب / ID فقط (الافتراضي)
+  // "email_password" -> بريد إلكتروني + كلمة مرور الحساب (لتطبيقات لا تدعم الشحن بالـ ID)
+  // "none"           -> لا يحتاج أي معرّف (مثال: بطاقات لا تربط بحساب)
+  identifierType String @default("player_id")
+  packages    Package[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Package {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name        String
+  sanaaPrice  Float
+  southPrice  Float
+  // "auto"  -> يُحسب من sanaaPrice تلقائيًا عبر إعدادات التسعير
+  // "manual"-> يُدخله المدير يدويًا ولا يتأثر بإعادة الحساب الجماعي
+  pricingMode String   @default("auto")
+  sortOrder   Int      @default(0)
+}
+
+model PaymentMethod {
+  id                String  @id @default(cuid())
+  name              String
+  type              String
+  accountNumber     String
+  accountHolder     String?
+  region            String  @default("both")
+  active            Boolean @default(true)
+  sortOrder         Int     @default(0)
+  requiresReference Boolean @default(true)
+}
+
+model Order {
+  id                String   @id @default(cuid())
+  // اسم العميل أصبح اختياريًا — رقم الهاتف + المعرّف المناسب كافيان لتنفيذ الطلب
+  customerName      String?
+  phone             String
+  playerId          String?
+  accountEmail      String?
+  // ⚠️ تُخزَّن حاليًا كنص عادي — راجع ملاحظة الأمان في README قبل الإطلاق الفعلي
+  accountPassword   String?
+  productName       String
+  productImage      String?
+  packageName       String
+  region            String
+  price             Float
+  paymentMethodId   String?
+  paymentMethodName String?
+  transferReference String?
+  status            String   @default("new")
+  createdAt         DateTime @default(now())
+}
+
+model Settings {
+  id                     Int     @id @default(1)
+  southMultiplier        Float   @default(3.0)
+  // عمولة إضافية ثابتة تُضاف لكل 1,000 ريال من سعر صنعاء (بعد ضرب المعامل)
+  southCommissionPer1000 Float   @default(250)
+  sanaaMargin            Float   @default(0)
+  southMargin            Float   @default(0)
+  roundStep              Int     @default(50)
+  autoPricingEnabled     Boolean @default(true)
+  whatsappNumber         String  @default("772764659")
+}
+
+// نسخة احتياطية تُؤخذ تلقائيًا قبل كل "إعادة حساب أسعار الجنوب" الجماعية
+model PriceBackup {
+  id        String   @id @default(cuid())
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+model ChangeLog {
+  id        String   @id @default(cuid())
+  action    String
+  user      String   @default("Admin")
+  createdAt DateTime @default(now())
+}

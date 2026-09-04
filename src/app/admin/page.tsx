@@ -131,12 +131,12 @@ function Dashboard({ products, orders }) {
     <div>
       <h2 className="font-bold text-lg mb-4">نظرة عامة</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-        <StatCard label="إجمالي الطلبات" value={orders.length} />
-        <StatCard label="طلبات اليوم" value={ordersToday.length} color="#3EC6B0" />
-        <StatCard label="قيد التنفيذ" value={orders.filter((o) => o.status === "processing").length} color="#B383F0" />
-        <StatCard label="مكتملة" value={orders.filter((o) => o.status === "completed").length} color="#4CC97C" />
-        <StatCard label="إجمالي المنتجات" value={products.length} />
-        <StatCard label="إجمالي المبيعات" value={fmt(totalSales) + " ريال"} color="#D4A64A" />
+        <StatCard color="blue" label="إجمالي الطلبات" value={orders.length} />
+        <StatCard color="blue" label="طلبات اليوم" value={ordersToday.length} color="#3EC6B0" />
+        <StatCard color="blue" label="قيد التنفيذ" value={orders.filter((o) => o.status === "processing").length} color="#B383F0" />
+        <StatCard color="blue" label="مكتملة" value={orders.filter((o) => o.status === "completed").length} color="#4CC97C" />
+        <StatCard color="blue" label="إجمالي المنتجات" value={products.length} />
+        <StatCard color="blue" label="إجمالي المبيعات" value={fmt(totalSales) + " ريال"} color="#D4A64A" />
       </div>
     </div>
   );

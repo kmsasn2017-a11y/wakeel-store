@@ -15,6 +15,8 @@ function fromPrice(product, region, settings) {
   return Math.min(...pkgs.map((pk) => packagePrice(pk, region, settings, margin)));
 }
 
+const WHATSAPP_NUMBER = "967772764659";
+
 export default function StorePage() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -52,19 +54,24 @@ export default function StorePage() {
     return matchCat && matchQuery;
   });
   const featured = activeProducts.filter((p) => p.featured);
+  const activeCategories = categories.filter((c) => c.active);
 
   return (
     <div className="max-w-6xl mx-auto px-4 pb-16">
       <TopBar />
 
-      <div className="relative overflow-hidden rounded-2xl mt-5 mb-6 p-6 sm:p-10 bg-gradient-to-br from-[#1B2440] to-[#141A2B] border border-border">
+      <div className="relative overflow-hidden rounded-2xl mt-5 mb-6 p-6 sm:p-10 bg-gradient-to-br from-[#1B2440] via-[#182036] to-[#0F1424] border border-border">
+        <span className="inline-block text-[10px] font-bold px-3 py-1 rounded-full bg-gold text-bg mb-3">
+          وكيل جوجل الرسمي
+        </span>
         <h1 className="text-2xl sm:text-4xl font-extrabold leading-tight mb-2">
           اشحن ألعابك وتطبيقاتك <span className="text-gold">بثقة وسرعة</span>
         </h1>
         <p className="text-muted text-sm sm:text-base max-w-md mb-5">
-          وكيل جوجل الرسمي في اليمن — أسعار واضحة لصنعاء والجنوب، وتسليم فوري لكل الباقات.
+          أسعار واضحة لصنعاء والجنوب، وتسليم فوري لكل الباقات.
         </p>
-        <div className="flex items-center gap-2 bg-bg border border-border rounded-xl px-3 py-2 max-w-sm">
+        <div className="flex items-center gap-2 bg-bg border border-border rounded-xl px-3 py-2.5 max-w-sm">
+          <span className="text-muted text-sm">🔍</span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -89,21 +96,19 @@ export default function StorePage() {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1 mb-6">
-        <button
+      <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-8">
+        <CategoryIcon
+          label="الكل"
+          active={activeCat === "all"}
           onClick={() => setActiveCat("all")}
-          className={`shrink-0 text-xs font-medium px-4 py-2 rounded-full border transition-colors ${activeCat === "all" ? "bg-gold text-bg border-gold" : "border-border text-muted"}`}
-        >
-          الكل
-        </button>
-        {categories.filter((c) => c.active).map((c) => (
-          <button
+        />
+        {activeCategories.map((c) => (
+          <CategoryIcon
             key={c.id}
+            label={c.name}
+            active={activeCat === c.id}
             onClick={() => setActiveCat(c.id)}
-            className={`shrink-0 text-xs font-medium px-4 py-2 rounded-full border transition-colors ${activeCat === c.id ? "bg-gold text-bg border-gold" : "border-border text-muted"}`}
-          >
-            {c.name}
-          </button>
+          />
         ))}
       </div>
 
@@ -125,70 +130,4 @@ export default function StorePage() {
         <Section title="وسائل الدفع المتاحة">
           <div className="flex flex-wrap gap-2">
             {paymentMethods.filter((p) => p.active).map((p) => (
-              <div key={p.id} className="bg-surface border border-border rounded-xl px-3 py-2 text-xs">
-                {p.name}
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {openProduct && (
-        <ProductModal
-          product={openProduct}
-          region={region}
-          setRegion={setRegion}
-          settings={settings}
-          paymentMethods={paymentMethods}
-          onClose={() => setOpenProduct(null)}
-        />
-      )}
-    </div>
-  );
-}
-
-function TopBar() {
-  return (
-    <div className="flex items-center justify-between h-14">
-      <div className="flex items-center gap-2 font-extrabold text-lg">
-        <span className="w-7 h-7 rounded-lg bg-gold flex items-center justify-center text-bg text-xs">G</span>
-        وكيل جوجل
-      </div>
-      <a href="/admin" className="text-xs text-muted hover:text-gold">لوحة التحكم</a>
-    </div>
-  );
-}
-function Section({ title, children }) {
-  return (
-    <div className="mb-8">
-      <h2 className="font-bold text-base mb-3">{title}</h2>
-      {children}
-    </div>
-  );
-}
-function Empty({ text }) {
-  return <div className="text-center py-14 text-[#5C6580] text-sm border border-dashed border-border rounded-xl">{text}</div>;
-}
-function Grid({ products, region, settings, onOpen }) {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-      {products.map((p) => (
-        <button key={p.id} onClick={() => onOpen(p)} className="text-right bg-surface border border-border rounded-xl overflow-hidden hover:border-gold/50 transition-colors">
-          <div className="aspect-square bg-bg overflow-hidden flex items-center justify-center">
-            {p.image ? (
-              <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
-            ) : (
-              <span className="text-[#4A5570] text-xs">لا توجد صورة</span>
-            )}
-          </div>
-          <div className="p-2.5">
-            <div className="text-xs font-semibold line-clamp-1 mb-1">{p.name}</div>
-            <div className="text-[11px] text-muted">
-              يبدأ من <span className="text-teal font-bold">{fmt(fromPrice(p, region, settings))}</span> ريال
-            </div>
-          </div>
-        </button>
-      ))}
-    </div>
-  );
-}
+              <div key={p.id} classNa

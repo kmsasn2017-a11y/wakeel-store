@@ -130,12 +130,21 @@ export default function StorePage() {
         <Section title="وسائل الدفع المتاحة">
           <div className="flex flex-wrap gap-2">
             {paymentMethods.filter((p) => p.active).map((p) => (
-              <div key={p.id} className="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2">
-                <span className="text-sm font-medium">{p.name}</span>
+              <div key={p.id} className="flex items-center gap-2 bg-surface border border-border rounded-xl px-3 py-2 text-sm text-muted">
+                {p.name}
               </div>
             ))}
           </div>
         </Section>
+      )}
+
+      {openProduct && (
+        <ProductModal
+          product={openProduct}
+          region={region}
+          settings={settings}
+          onClose={() => setOpenProduct(null)}
+        />
       )}
     </div>
   );
@@ -144,7 +153,7 @@ export default function StorePage() {
 function TopBar() {
   return (
     <div className="flex items-center justify-between py-4">
-      <div className="text-lg font-bold text-gold">متجر الشحن</div>
+      <span className="font-bold text-lg text-gold">متجر الباقات</span>
     </div>
   );
 }
@@ -153,7 +162,7 @@ function CategoryIcon({ label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-center justify-center rounded-xl border p-2 text-xs font-medium transition-colors ${active ? "bg-gold text-bg border-gold" : "bg-surface border-border text-muted"}`}
+      className={`flex flex-col items-center justify-center rounded-xl py-2 px-1 text-xs font-medium transition-colors border ${active ? "bg-gold text-bg border-gold" : "bg-surface border-border text-muted"}`}
     >
       {label}
     </button>
@@ -163,7 +172,7 @@ function CategoryIcon({ label, active, onClick }) {
 function Section({ title, children }) {
   return (
     <div className="mb-8">
-      <h2 className="text-base font-bold mb-4">{title}</h2>
+      <h2 className="text-base font-bold mb-3">{title}</h2>
       {children}
     </div>
   );
@@ -185,15 +194,57 @@ function ProductCard({ product, region, settings, onOpen }) {
   return (
     <div
       onClick={() => onOpen(product)}
-      className="cursor-pointer bg-surface border border-border rounded-2xl p-4 hover:border-gold transition-colors"
+      className="cursor-pointer bg-surface border border-border rounded-2xl p-4 flex flex-col gap-2 hover:border-gold transition-colors"
     >
-      <div className="text-sm font-semibold mb-1">{product.name}</div>
-      <div className="text-xs text-muted mb-2">{product.category?.name}</div>
-      <div className="text-gold font-bold text-sm">{price > 0 ? `${price} ر.ي` : "—"}</div>
+      {product.image && (
+        <img src={product.image} alt={product.name} className="w-full h-24 object-contain rounded-xl mb-1" />
+      )}
+      <div className="font-bold text-sm">{product.name}</div>
+      <div className="text-gold text-xs font-semibold">
+        يبدأ من {price} ر.ي
+      </div>
+    </div>
+  );
+}
+
+function ProductModal({ product, region, settings, onClose }) {
+  const margin = product.category?.marginPercent || 0;
+  const pkgs = product.packages || [];
+  const msg = `مرحباً، أريد شراء باقة من منتج: ${product.name}`;
+  const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={onClose}>
+      <div className="bg-surface border border-border rounded-2xl w-full max-w-md p-6 relative" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-3 left-3 text-muted hover:text-white text-xl">✕</button>
+        <div className="font-extrabold text-lg mb-4">{product.name}</div>
+        {pkgs.length === 0 ? (
+          <Empty text="لا توجد باقات متاحة" />
+        ) : (
+          <div className="flex flex-col gap-3 mb-5">
+            {pkgs.map((pkg) => {
+              const price = packagePrice(pkg, region, settings, margin);
+              return (
+                <div key={pkg.id} className="flex items-center justify-between bg-bg border border-border rounded-xl px-4 py-3">
+                  <span className="text-sm font-medium">{pkg.name}</span>
+                  <span className="text-gold font-bold text-sm">{price} ر.ي</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="block w-full text-center bg-teal text-bg font-bold rounded-xl py-3 text-sm hover:opacity-90 transition-opacity"
+        >
+          اطلب عبر واتساب
+        </a>
+      </div>
     </div>
   );
 }
 
 function Empty({ text }) {
-  return <div className="text-center text-muted py-10 text-sm">{text}</div>;
+  return <div className="text-center text-muted py-8 text-sm">{text}</div>;
 }
